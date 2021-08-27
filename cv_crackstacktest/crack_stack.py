@@ -4,15 +4,15 @@ from matplotlib import pyplot as plt
 
 fname = "AMG6a_130000C__rec00001235.bmp"
 img = cv.imread(fname, 0)
-cv.imshow(fname, img)
+# cv.imshow(fname, img)
 
 # apply global hist equalization
 equ = cv.equalizeHist(img)
-cv.imshow('After global hist equalization', equ)
+# cv.imshow('After global hist equalization', equ)
 
 # denoising using gaussian filter
 gaus = cv.GaussianBlur(equ, (5, 5), 0)
-cv.imshow('After Gaussian blur, k=5', gaus)
+# cv.imshow('After Gaussian blur, k=5', gaus)
 
 # denoising using median filter
 # median = cv.medianBlur(img, 5)
@@ -23,7 +23,7 @@ cv.imshow('After Gaussian blur, k=5', gaus)
 
 # denoising using nonlocal means algorithm
 dst1 = cv.fastNlMeansDenoising(gaus, None, 8, 7, 21)
-cv.imshow('After nonlocal denoising (gaus)', dst1)
+# cv.imshow('After nonlocal denoising (gaus)', dst1)
 
 # dst2 = cv.fastNlMeansDenoising(img, None, 20, 7, 21)
 # cv.imshow('After nonlocal denoising (original)', dst2)
@@ -45,7 +45,7 @@ img_blur = cv.GaussianBlur(img, (15, 15), 0)
 ret2, ostu2 = cv.threshold(img_blur, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
 kernel = np.ones((5, 5), np.uint8)
 ostu2_opening = cv.morphologyEx(ostu2, cv.MORPH_OPEN, kernel)
-cv.imshow('After Otsu binarization (cross-section)', ostu2_opening)
+# cv.imshow('After Otsu binarization (cross-section)', ostu2_opening)
 
 # find the contour of the cross-section
 contours, hierarchy = cv.findContours(
@@ -59,7 +59,7 @@ _, radius = cv.minEnclosingCircle(cnt)
 # create a circle mask
 mask = np.zeros(img.shape[:2], np.uint8)
 cv.circle(mask, (cx, cy), int(radius-10), 255, thickness=-1)
-cv.imshow('Mask circle', mask)
+# cv.imshow('Mask circle', mask)
 
 # apply bitwise operation
 crack = cv.bitwise_not(ostu, mask=mask)
