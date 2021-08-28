@@ -1,7 +1,17 @@
 import numpy as np
 import cv2 as cv
+import os
 from matplotlib import pyplot as plt
 
+# find the path 
+
+# list the names of crack images
+
+# read all of the images
+
+# define the function that read an image, return the image that contains a crack
+
+# 
 fname = "AMG6a_130000C__rec00001235.bmp"
 img = cv.imread(fname, 0)
 # cv.imshow(fname, img)
