@@ -61,7 +61,7 @@ for f in folders:
         # cv.imshow(img, crack)
 
         cx, cy, r = cross_section_contour(
-            img_array, 10)  # get the contour circle
+            img_array, 14)  # get the contour circle
         # create a circle mask
         cir_mask = np.zeros(img_array.shape[:2], np.uint8)
         cv.circle(cir_mask, (cx, cy), r, 255, thickness=-1)
@@ -70,10 +70,12 @@ for f in folders:
         crack = cv.bitwise_not(crack, mask=cir_mask)
         crack_final = cv.add(crack_final, crack)  # add all the images together
 
+        # remove noise using morphological transformations (opening)
+        # kernel = np.ones((5, 5), np.uint8)
+        # crack_final = cv.morphologyEx(crack_final, cv.MORPH_OPEN, kernel)
+
     cv.imshow('Final crack object', crack_final)
 
-
-# crack_opening = cv.morphologyEx(crack, cv.MORPH_OPEN, kernel)
 
 cv.waitKey()
 cv.destroyAllWindows()
