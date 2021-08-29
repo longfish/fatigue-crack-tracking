@@ -1,11 +1,10 @@
 import numpy as np
 import cv2 as cv
 import os
-from matplotlib import pyplot as plt
 
 
 def crack_detection(img, h, th_g):
-    '''detect the crack, return the cross-section as an object'''
+    '''Detect the crack, return the cross-section as an object'''
 
     equ = cv.equalizeHist(img)  # apply global hist equalization
     gaus = cv.GaussianBlur(equ, (5, 5), 0)  # denoising using gaussian filter
@@ -33,7 +32,7 @@ def cross_section_contour(img, offset):
     ostu2_opening = cv.morphologyEx(ostu2, cv.MORPH_OPEN, kernel)
 
     # find the contour of the cross-section
-    contours, hierarchy = cv.findContours(
+    contours, _ = cv.findContours(
         ostu2_opening, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
     cnt = contours[0]
     M = cv.moments(cnt)
@@ -42,6 +41,37 @@ def cross_section_contour(img, offset):
     _, radius = cv.minEnclosingCircle(cnt)
 
     return cx, cy, int(radius-offset)
+
+
+def find_max_contour(img):
+    '''find the maximum contour by area of bounding rectangular'''
+    contours, _ = cv.findContours(
+        img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+
+    max_area = 0
+    max_cont = contours[0]
+    for cont in contours:
+        _, _, w, h = cv.boundingRect(cont)
+        area = w*h
+        if (area > max_area):
+            max_area = area
+            max_cont = cont
+    return max_cont
+
+
+def crack_extraction(img):
+    '''
+    Extract crack from the noised image
+    Output: the convex hull image of the crack
+    '''
+    kernel = np.ones((2, 2), np.uint8)
+    crack_final = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
+    max_cont = find_max_contour(crack_final)
+    crack_hull = cv.convexHull(max_cont)
+    blank = np.zeros((736, 736), np.uint8)
+    cv.drawContours(blank, [crack_hull], 0, 250, -1)
+
+    return blank
 
 
 # find the directories of the crack, and list the crack images
@@ -70,34 +100,9 @@ for f in folders:
         crack = cv.bitwise_not(crack, mask=cir_mask)
         crack_final = cv.add(crack_final, crack)  # add all the images together
 
-        # remove noise using morphological transformations (opening)
-        # kernel = np.ones((5, 5), np.uint8)
-        # crack_final = cv.morphologyEx(crack_final, cv.MORPH_OPEN, kernel)
-
+    crack_final = crack_extraction(crack_final)
     cv.imshow('Final crack object', crack_final)
 
 
 cv.waitKey()
 cv.destroyAllWindows()
-
-'''
-
-
-# apply adaptive thresholding
-# th = cv.adaptiveThreshold(dst1, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-#                           cv.THRESH_BINARY, 19, 8)
-# cv.imshow('After adaptive thresholding', th)
-
-# create a CLAHE object (Arguments are optional).
-# clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-# cl1 = clahe.apply(img)
-# cv.imshow('After CLAHE hist equalization', cl1)
-
-# plot the histogram
-# plt.hist(equ.ravel(), 256, [0, 256])
-# plt.show()
-
-
-cv.waitKey()
-cv.destroyAllWindows()
-'''
