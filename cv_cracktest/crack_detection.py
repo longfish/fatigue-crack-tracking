@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
 
-fname = "AMG6a_130000C__rec00001235.bmp"
+fname = "AMG6a_130000C__rec00001230.bmp"
 img = cv.imread(fname, 0)
 cv.imshow(fname, img)
 
@@ -33,12 +33,12 @@ cv.imshow('After nonlocal denoising (gaus)', dst1)
 # cv.imshow('Edges', edges)
 
 # apply global threshhold
-# ret, th1 = cv.threshold(dst1, 110, 255, cv.THRESH_BINARY)
-# cv.imshow('After global threshold', th1)
+ret, th1 = cv.threshold(dst1, 100, 255, cv.THRESH_BINARY)
+cv.imshow('After global threshold', th1)
 
 # apply Otsu's binarization
-ret, ostu = cv.threshold(dst1, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
-cv.imshow('After Otsu binarization', ostu)
+# ret, ostu = cv.threshold(dst1, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
+# cv.imshow('After Otsu binarization', ostu)
 
 # create an intact cross-section
 img_blur = cv.GaussianBlur(img, (15, 15), 0)
@@ -61,8 +61,8 @@ mask = np.zeros(img.shape[:2], np.uint8)
 cv.circle(mask, (cx, cy), int(radius-10), 255, thickness=-1)
 cv.imshow('Mask circle', mask)
 
-# apply bitwise operation
-crack = cv.bitwise_not(ostu, mask=mask)
+# apply bitwise operation to get the crack object
+crack = cv.bitwise_not(th1, mask=mask)
 # crack_opening = cv.morphologyEx(crack, cv.MORPH_OPEN, kernel)
 cv.imshow('Crack', crack)
 
