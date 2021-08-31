@@ -11,7 +11,7 @@ def nothing(x):
     pass
 
 
-def crack_detection(img, h, th_g):
+def image_filter(img, h, th_g):
 
     # apply global hist equalization
     equ = cv.equalizeHist(img)
@@ -40,7 +40,7 @@ def crack_detection(img, h, th_g):
 cv.createTrackbar('h', 'image', 0, 20, nothing)
 cv.createTrackbar('th_g', 'image', 0, 150, nothing)
 
-img1 = crack_detection(img, 0, 0)
+img1 = image_filter(img, 0, 0)
 
 while(True):
     cv.imshow('image', img1)
@@ -52,7 +52,7 @@ while(True):
     h = cv.getTrackbarPos('h', 'image')
     th_g = cv.getTrackbarPos('th_g', 'image')
 
-    img1 = crack_detection(img, h, th_g)
+    img1 = image_filter(img, h, th_g)
 
 
 cv.destroyAllWindows()
