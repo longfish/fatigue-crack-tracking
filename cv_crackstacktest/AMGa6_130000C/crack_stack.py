@@ -2,8 +2,10 @@
 Compute the crack geometry from a stack of crack images
 
 Usage:
-  put the script into the crack images parent path of a loading sample
+  Put the script into the parent path of all crack images (for one sample)
 
+Version:
+  2021-8-30, initial finished version of crack tracking program
 '''
 
 import numpy as np
