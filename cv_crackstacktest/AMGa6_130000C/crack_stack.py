@@ -98,7 +98,6 @@ def crack_geo_calc(c, cnt):
         if (ang < 0):
             ang += 2*np.pi
 
-        print(ang)
         # modify the [min,max] range of the angle
         if(ang < min_ang):
             min_ang = ang
@@ -106,12 +105,11 @@ def crack_geo_calc(c, cnt):
             max_ang = ang
 
         # find the minimum distance between contour points and center
-        dis = np.sqrt((cnt[0][0][0]-c[0])*(cnt[0][0][0]-c[0]) +
-                      (cnt[0][0][1]-c[1])*(cnt[0][0][1]-c[1]))
+        dis = np.sqrt((p[0][0]-c[0])*(p[0][0]-c[0]) +
+                      (p[0][1]-c[1])*(p[0][1]-c[1]))
         if(dis < min_dis):
             min_dis = dis
 
-    print(c[2], min_dis, max_ang, min_ang)
     return area, (c[2]-min_dis), c[2]*(max_ang-min_ang)
 
 
@@ -152,12 +150,13 @@ def main():
         crack_hull = crack_hull_extraction(crack_final)
         (area, depth, side_length) = crack_geo_calc(
             (np.mean(cx_stack), np.mean(cy_stack), np.mean(r_stack)), crack_hull)
-        print(area*PIXEL*PIXEL, depth*PIXEL, side_length*PIXEL)
+        print("Crack-"+f+": area =", area*PIXEL*PIXEL, ", depth =",
+              depth*PIXEL, ", side length =", side_length*PIXEL)
 
         # draw the crack on a blank plate
         blank = np.zeros((736, 736), np.uint8)
         cv.drawContours(blank, [crack_hull], 0, 250, -1)
-        cv.imshow('Final crack object', blank)
+        cv.imshow("Crack-"+f, blank)
     cv.waitKey()
 
 
