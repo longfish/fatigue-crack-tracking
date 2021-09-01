@@ -88,6 +88,7 @@ def cracks_extraction(img, num=1):
 def crack_geo_calc(c, cnt):
     '''
     Calculate the geometric information of the contour (cnt)
+    Note: only valid if the crack doesn't contain center point and depth < r
     Input: 
         c = (cx, cy, r)
         cnt, the contour of crack
@@ -95,27 +96,43 @@ def crack_geo_calc(c, cnt):
     '''
     area = cv.contourArea(cnt)
 
-    min_ang = np.arctan2(cnt[0][0][0]-c[0], cnt[0][0][1]-c[1])
-    max_ang = min_ang
-    min_dis = 1000
+    min_dis = c[2]
+    max_ang = 0
     for p in cnt:
-        ang = np.arctan2(p[0][0]-c[0], p[0][1]-c[1])
-        if (ang < 0):
-            ang += 2*np.pi
-
-        # modify the [min,max] range of the angle
-        if(ang < min_ang):
-            min_ang = ang
-        elif(ang > max_ang):
-            max_ang = ang
-
         # find the minimum distance between contour points and center
         dis = np.sqrt((p[0][0]-c[0])*(p[0][0]-c[0]) +
                       (p[0][1]-c[1])*(p[0][1]-c[1]))
         if(dis < min_dis):
             min_dis = dis
 
-    return area, (c[2]-min_dis), c[2]*(max_ang-min_ang)
+    # get the convex hull of the crack
+    hull = cv.convexHull(cnt)
+    # draw the crack on a blank plate
+    # blank = np.zeros((736, 736), np.uint8)
+    # cv.drawContours(blank, [hull], 0, 250, -1)
+    # cv.imshow("Hull", blank)
+
+    # find the central angle of the crack hull
+    for p in hull:
+        vec1 = [p[0][0]-c[0], p[0][1]-c[1]]
+        for q in hull:
+            vec2 = [q[0][0]-c[0], q[0][1]-c[1]]
+            ang = find_angle(vec1, vec2)
+            if(ang > max_ang):
+                max_ang = ang
+
+    return area, (c[2]-min_dis), c[2]*max_ang
+
+
+def find_angle(vec1, vec2):
+    '''
+    Find the angle between vectors vec1 and vec2
+    Input: vec1, vec2 = [x1, x2]
+    '''
+    unit_vec1 = vec1/np.linalg.norm(vec1)
+    unit_vec2 = vec2/np.linalg.norm(vec2)
+    dot_product = np.dot(unit_vec1, unit_vec2)
+    return np.arccos(dot_product)
 
 
 def main():
