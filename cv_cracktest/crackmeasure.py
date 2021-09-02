@@ -2,6 +2,9 @@
 Compute the crack geometry from a stack of crack images
 Usage: 
     Put the script into the parent path of all crack images
+
+Todo:
+    Rotate the crack to right hand side
 '''
 
 import heapq as pq
@@ -113,7 +116,7 @@ def is_pore(cnt, c):
         return False
 
 
-def crack_geo_calc(c, cnt):
+def calc_crack_geo(c, cnt):
     '''
     Calculate the geometric information of the contour (cnt)
     Note: only valid if the crack doesn't contain center point and depth < r
@@ -146,16 +149,16 @@ def crack_geo_calc(c, cnt):
         vec1 = np.array([p[0][0]-c[0], p[0][1]-c[1]])
         for q in hull:
             vec2 = np.array([q[0][0]-c[0], q[0][1]-c[1]])
-            ang = find_angle(vec1, vec2)
+            ang = calc_angle(vec1, vec2)
             if(ang > max_ang):
                 max_ang = ang
 
     return area, (c[2]-min_dis), c[2]*max_ang
 
 
-def find_angle(vec1, vec2):
+def calc_angle(vec1, vec2):
     '''
-    Find the angle between vectors vec1 and vec2
+    Determine the angle between vectors vec1 and vec2
     Input: vec1, vec2 are np.array
     '''
     cos = vec1.dot(vec2)/(np.linalg.norm(vec1)*np.linalg.norm(vec2))
@@ -210,7 +213,7 @@ def main():
             crack_hub = cracks_extraction(crack_final, (np.mean(
                 cx_stack), np.mean(cy_stack), np.mean(r_stack)), crack_num)
             for i, c in enumerate(crack_hub):
-                (area, depth, side_length) = crack_geo_calc(
+                (area, depth, side_length) = calc_crack_geo(
                     (np.mean(cx_stack), np.mean(cy_stack), np.mean(r_stack)), c)
                 crack_info.write(stepf+"-"+crackf+"-"+str(i)+": "+str(area*PIXEL*PIXEL)+", " +
                                  str(depth*PIXEL)+", "+str(side_length*PIXEL)+"\n")
