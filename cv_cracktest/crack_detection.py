@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 
 PIXEL = 0.0061
 
-fname = "AMG5_135000C__rec00001203.bmp"
+fname = "AMG5_215000C__rec00000930.bmp"
 img = cv.imread(fname, 0)
 cv.imshow(fname, img)
 
@@ -77,6 +77,7 @@ cv.circle(mask, (cx, cy), r, 255, thickness=-1)
 crack = cv.bitwise_not(th1, mask=mask)
 # crack_opening = cv.morphologyEx(crack, cv.MORPH_OPEN, kernel)
 cv.imshow('Crack', crack)
+
 
 # extract all cracks
 # crack_hull = cmeas.contour_sort_area(crack)

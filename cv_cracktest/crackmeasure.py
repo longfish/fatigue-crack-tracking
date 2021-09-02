@@ -107,7 +107,7 @@ def is_pore(cnt, c):
     depth = c[2] - np.sqrt((centx-c[0])*(centx-c[0])+(centy-c[1])*(centy-c[1]))
 
     # internal pores criteria
-    if(depth > side_length and side_length < 0.2*c[2]):
+    if(depth > 2*side_length and side_length < 0.1*c[2]):
         return True
     else:
         return False
@@ -237,6 +237,8 @@ def main():
             crack_num = 1
             crack_hub = cracks_extraction(crack_final, (np.mean(
                 cx_stack), np.mean(cy_stack), np.mean(r_stack)), crack_num)
+            if(len(crack_hub == 0)):
+                crack_hub = np.array([]) # no crack detected
             for i, c in enumerate(crack_hub):
                 (area, depth, side_length) = calc_crack_geo(
                     (np.mean(cx_stack), np.mean(cy_stack), np.mean(r_stack)), c)
