@@ -1,10 +1,10 @@
 '''
 Compute the crack geometry from a stack of crack images
-
-Usage:
-  Put the script into the parent path of all crack images (for one sample)
+Usage: 
+    Put the script into the parent path of all crack images
 '''
 
+import heapq as pq
 import numpy as np
 import cv2 as cv
 import os
@@ -18,7 +18,7 @@ def image_filter(img, h, th_g):
     '''
 
     equ = cv.equalizeHist(img)  # apply global hist equalization
-    gaus = cv.GaussianBlur(equ, (5, 5), 0)  # denoising using gaussian filter
+    gaus = cv.GaussianBlur(equ, (7, 7), 0)  # denoising using gaussian filter
     # denoising using nonlocal means algorithm
     dst1 = cv.fastNlMeansDenoising(gaus, None, h, 7, 21)
 
@@ -59,7 +59,7 @@ def contour_sort_area(img):
     contours, _ = cv.findContours(
         img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
 
-    # sort using key
+    # sort using key (contour area)
     contours.sort(key=cv.contourArea, reverse=True)
     return contours
 
@@ -71,8 +71,8 @@ def cracks_extraction(img, num=1):
     Output: 
         a list of cracks (max to min area)
     '''
-    kernel = np.ones((3, 3), np.uint8)
-    # img = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
+    kernel = np.ones((2, 2), np.uint8)
+    img = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
     img = cv.morphologyEx(img, cv.MORPH_CLOSE, kernel)
     cnts = contour_sort_area(img)
 
@@ -96,14 +96,14 @@ def crack_geo_calc(c, cnt):
     '''
     area = cv.contourArea(cnt)
 
-    min_dis = c[2]
-    max_ang = 0
+    # find the minimum distance between contour points and center using heap queue
+    dis_arr = []
     for p in cnt:
-        # find the minimum distance between contour points and center
         dis = np.sqrt((p[0][0]-c[0])*(p[0][0]-c[0]) +
                       (p[0][1]-c[1])*(p[0][1]-c[1]))
-        if(dis < min_dis):
-            min_dis = dis
+        dis_arr.append(dis)
+    dis_smallest = pq.nsmallest(int(len(dis_arr)/4), dis_arr)
+    min_dis = np.mean(dis_smallest)
 
     # get the convex hull of the crack
     hull = cv.convexHull(cnt)
@@ -113,6 +113,7 @@ def crack_geo_calc(c, cnt):
     # cv.imshow("Hull", blank)
 
     # find the central angle of the crack hull
+    max_ang = 0
     for p in hull:
         vec1 = [p[0][0]-c[0], p[0][1]-c[1]]
         for q in hull:
