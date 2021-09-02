@@ -64,10 +64,12 @@ def contour_sort_area(img):
     return contours
 
 
-def cracks_extraction(img, num=1):
+def cracks_extraction(img, c, num=1):
     '''
-    Extract the cracks from the binary image (including some noises).
-    Input: num, number of cracks to extract
+    Extract the cracks from the binary image (including some noises). 
+    Input: 
+        c = (cx, cy, r), contour circle of the cross-section
+        num, number of cracks to extract
     Output: 
         a list of cracks (max to min area)
     '''
@@ -79,12 +81,36 @@ def cracks_extraction(img, num=1):
     cnts = contour_sort_area(img)
 
     crack_poly = []
-    for i in range(num):
-        # diff = eps*cv.arcLength(cnts[i], True)
-        # crack_poly.append(cv.approxPolyDP(cnts[i], diff, True))
-        crack_poly.append(cnts[i])
+    k = 0
+    for cnt in cnts:
+        # check if the contour is a pore
+        if(not is_pore(cnt, c)):
+            crack_poly.append(cnt)
+            k += 1
+        if(k >= num):
+            break
 
     return crack_poly
+
+
+def is_pore(cnt, c):
+    '''
+    Determine of the contour is a internal pore
+    Input:
+        cnt, contour of the object
+        c = (cx, cy, r), contour circle of the cross-section
+    '''
+    side_length = np.sqrt(cv.contourArea(cnt))
+    M = cv.moments(cnt)
+    centx = int(M['m10']/M['m00'])  # centroid
+    centy = int(M['m01']/M['m00'])
+    depth = c[2] - np.sqrt((centx-c[0])*(centx-c[0])+(centy-c[1])*(centy-c[1]))
+
+    # internal pores criteria
+    if(depth > side_length and side_length < 0.2*c[2]):
+        return True
+    else:
+        return False
 
 
 def crack_geo_calc(c, cnt):
@@ -181,12 +207,15 @@ def main():
 
             # cv.imshow("Added crack ", crack_final)
             crack_num = 1
-            crack_hub = cracks_extraction(crack_final, crack_num)
+            crack_hub = cracks_extraction(crack_final, (np.mean(
+                cx_stack), np.mean(cy_stack), np.mean(r_stack)), crack_num)
             for i, c in enumerate(crack_hub):
                 (area, depth, side_length) = crack_geo_calc(
                     (np.mean(cx_stack), np.mean(cy_stack), np.mean(r_stack)), c)
                 crack_info.write(stepf+"-"+crackf+"-"+str(i)+": "+str(area*PIXEL*PIXEL)+", " +
                                  str(depth*PIXEL)+", "+str(side_length*PIXEL)+"\n")
+                print(stepf+"-"+crackf+"-"+str(i)+": "+str(area*PIXEL*PIXEL)+", " +
+                      str(depth*PIXEL)+", "+str(side_length*PIXEL)+"\n")
 
                 # draw the crack on a blank plate
                 blank = np.zeros(img_ref.shape[:2], np.uint8)

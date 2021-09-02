@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 
 PIXEL = 0.0061
 
-fname = "AMG6a_130000C__rec00001235.bmp"
+fname = "AMG5_135000C__rec00001203.bmp"
 img = cv.imread(fname, 0)
 cv.imshow(fname, img)
 
@@ -80,7 +80,7 @@ cv.imshow('Crack', crack)
 
 # extract all cracks
 # crack_hull = cmeas.contour_sort_area(crack)
-crack_hull = cmeas.cracks_extraction(crack, num=2)
+crack_hull = cmeas.cracks_extraction(crack, (cx, cy, r), num=2)
 
 print(len(crack_hull))
 # draw the crack contours
