@@ -237,8 +237,8 @@ def main():
             crack_num = 1
             crack_hub = cracks_extraction(crack_final, (np.mean(
                 cx_stack), np.mean(cy_stack), np.mean(r_stack)), crack_num)
-            if(len(crack_hub == 0)):
-                crack_hub = np.array([]) # no crack detected
+            if(len(crack_hub) == 0):
+                crack_hub = np.array([])  # no crack detected
             for i, c in enumerate(crack_hub):
                 (area, depth, side_length) = calc_crack_geo(
                     (np.mean(cx_stack), np.mean(cy_stack), np.mean(r_stack)), c)
