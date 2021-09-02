@@ -88,9 +88,10 @@ blank1 = np.zeros(img.shape[:2], np.uint8)
 cv.drawContours(blank1, [crack_hull[0]], 0, 250, -1)
 cv.imshow("Crack1", blank1)
 
+crack_rot = cmeas.rotate2y(crack_hull[0], (cx, cy))
 blank2 = np.zeros(img.shape[:2], np.uint8)
-cv.drawContours(blank2, [crack_hull[1]], 0, 250, -1)
-cv.imshow("Crack2", blank2)
+cv.drawContours(blank2, [crack_rot], 0, 250, -1)
+cv.imshow("Crack1 - rotated", blank2)
 
 # (area, depth, side_length) = cmeas.crack_geo_calc(
 #     (np.mean(cx), np.mean(cy), np.mean(r)), crack_hull)

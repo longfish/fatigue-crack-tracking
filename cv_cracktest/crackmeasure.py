@@ -2,9 +2,6 @@
 Compute the crack geometry from a stack of crack images
 Usage: 
     Put the script into the parent path of all crack images
-
-Todo:
-    Rotate the crack to right hand side
 '''
 
 import heapq as pq
@@ -165,6 +162,34 @@ def calc_angle(vec1, vec2):
     return np.arccos(np.clip(cos, -1.0, 1.0))
 
 
+def rotate2y(cnt, c):
+    '''
+    Rotate the contour with cernter c, make its centroid on the y-axis
+    Input:
+        cnt, (a numpy ndarray), the contour 
+        c, (cx, cy), the center coordinate
+    '''
+    M = cv.moments(cnt)
+    centx = int(M['m10']/M['m00'])  # centroid of the contour
+    centy = int(M['m01']/M['m00'])
+    v1 = np.array([centx-c[0], centy-c[1]])
+    v2 = np.array([0, 1])
+    r_ang = calc_angle(v1, v2)
+    if(centx-c[0] < 0):
+        r_ang = -r_ang
+
+    # rotate the contour
+    # print(r_ang*180/np.pi)
+    M = np.array([[np.cos(r_ang), -np.sin(r_ang)],
+                  [np.sin(r_ang), np.cos(r_ang)]])  # rotation matrix
+    # print(M)
+    cnt_rot = []
+    for p in cnt:
+        p_rot = M.dot(np.array([p[0][0]-c[0], p[0][1]-c[1]]))
+        cnt_rot.append([[int(p_rot[0]+c[0]), int(p_rot[1]+c[1])]])
+    return np.array(cnt_rot)
+
+
 def main():
     crack_info = open('crack_info.txt', 'w')
     cwd = os.getcwd()  # find the directories of the crack, and list the crack images
@@ -220,9 +245,11 @@ def main():
                 print(stepf+"-"+crackf+"-"+str(i)+": "+str(area*PIXEL*PIXEL)+", " +
                       str(depth*PIXEL)+", "+str(side_length*PIXEL)+"\n")
 
+                # rotate the crack on the y-axis
+                c_rot = rotate2y(c, (np.mean(cx_stack), np.mean(cy_stack)))
                 # draw the crack on a blank plate
                 blank = np.zeros(img_ref.shape[:2], np.uint8)
-                cv.drawContours(blank, [c], 0, 250, -1)
+                cv.drawContours(blank, [c_rot], 0, 250, -1)
                 cv.imwrite(stepf+"-"+crackf+"-"+str(i)+".png", blank)
     cv.waitKey()
 
