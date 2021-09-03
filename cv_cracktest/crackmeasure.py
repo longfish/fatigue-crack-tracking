@@ -259,9 +259,10 @@ def main():
                       str(depth*PIXEL)+", "+str(side_length*PIXEL)+"\n")
 
                 # rotate the crack on the y-axis, then translate
-                c_rot = rotate2y(c, (np.mean(cx_stack), np.mean(cy_stack)))
-                c_trans = translate(
-                    c_rot, (np.mean(cx_stack), np.mean(cy_stack)), (img_ref.shape[0]/2, img_ref.shape[0]/2))
+                # c_rot = rotate2y(c, (np.mean(cx_stack), np.mean(cy_stack)))
+                # c_trans = translate(
+                #     c_rot, (np.mean(cx_stack), np.mean(cy_stack)), (img_ref.shape[0]/2, img_ref.shape[0]/2))
+                c_trans = c
                 # draw the crack on a blank plate
                 blank = np.zeros(img_ref.shape[:2], np.uint8)
                 cv.drawContours(blank, [c_trans], 0, 250, -1)
