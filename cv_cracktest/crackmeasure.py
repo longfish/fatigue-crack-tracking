@@ -190,6 +190,17 @@ def rotate2y(cnt, c):
     return np.array(cnt_rot)
 
 
+def translate(cnt, c1, c2):
+    '''
+    Translate the contour from center c1 to center c2
+    '''
+    cnt_trans = []
+    for p in cnt:
+        cnt_trans.append(
+            [[int(p[0][0]+c2[0]-c1[0]), int(p[0][1]+c2[1]-c1[0])]])
+    return np.array(cnt_trans)
+
+
 def main():
     crack_info = open('crack_info.txt', 'w')
     cwd = os.getcwd()  # find the directories of the crack, and list the crack images
@@ -247,11 +258,13 @@ def main():
                 print(stepf+"-"+crackf+"-"+str(i)+": "+str(area*PIXEL*PIXEL)+", " +
                       str(depth*PIXEL)+", "+str(side_length*PIXEL)+"\n")
 
-                # rotate the crack on the y-axis
+                # rotate the crack on the y-axis, then translate
                 c_rot = rotate2y(c, (np.mean(cx_stack), np.mean(cy_stack)))
+                c_trans = translate(
+                    c_rot, (np.mean(cx_stack), np.mean(cy_stack)), (img_ref.shape[0]/2, img_ref.shape[0]/2))
                 # draw the crack on a blank plate
                 blank = np.zeros(img_ref.shape[:2], np.uint8)
-                cv.drawContours(blank, [c_rot], 0, 250, -1)
+                cv.drawContours(blank, [c_trans], 0, 250, -1)
                 cv.imwrite(stepf+"-"+crackf+"-"+str(i)+".png", blank)
     cv.waitKey()
 
