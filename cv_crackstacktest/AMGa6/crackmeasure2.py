@@ -16,7 +16,6 @@ def main():
     crackfolders = [dir for dir in os.listdir(cwd) if (
         os.path.isdir(dir) and dir.isalnum())]
 
-    print(crackfolders)
     # loop the crack folders
     for crackf in crackfolders:
         crack_dir = os.path.join(cwd, crackf)
@@ -29,12 +28,14 @@ def main():
         # loop the crack images in the current folder and add together
         for img in imgs:
             img_array = cv.imread(os.path.join(crack_dir, img), 0)
-            img_array = cmeas.image_filter(img_array, 12, 100)
+            # img_array = cv.GaussianBlur(img_array, (11, 11), 0)
+            img_array = cv.fastNlMeansDenoising(img_array, None, 13, 7, 21)
+            # img_array = cmeas.image_filter(img_array, 12, 100)
 
             # apply bitwise operation to obtain the crack object
             # crack_final = cv.bitwise_and(img_array, crack_final)
-            crack_final = cv.bitwise_xor(img_array, crack_final)
-            # crack_final = cv.min(img_array, crack_final)
+            # crack_final = cv.bitwise_xor(img_array, crack_final)
+            crack_final = cv.min(img_array, crack_final)
 
         cv.imshow("Crack final"+crackf, crack_final)
     cv.waitKey()
